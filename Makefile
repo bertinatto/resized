@@ -10,8 +10,7 @@ clean:
 .PHONY: test
 test:
 	@make clean
-	@py.test --verbose tests/
-	@py.test --flake8 $(APP)
+	@docker-compose run api python -m unittest discover
 
 .PHONY: start-compose
 start-compose:
