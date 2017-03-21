@@ -1,0 +1,36 @@
+version: '2'
+services:
+
+# Run the API in debug mode
+  api:
+    build: .
+    ports:
+     - "5000:5000"
+    environment:
+      - FLASK_APP=wsgi.py
+      - FLASK_DEBUG=1
+    command: flask run -h 0.0.0.0
+    volumes:
+     - .:/chroot
+     - /tmp/upload/original:/original
+     - /tmp/upload/scaled:/scaled
+    depends_on:
+     - celery
+     - redis
+
+# The worker runs in the same image as the API
+  celery:
+    build: .
+    command: celery worker -A resized.tasks.celery_app --loglevel=DEBUG
+    volumes:
+     - .:/chroot
+     - /tmp/upload/original:/original
+     - /tmp/upload/scaled:/scaled
+    depends_on:
+     - rabbitmq
+
+# Auxiliary services
+  redis:
+    image: redis
+  rabbitmq:
+    image: rabbitmq

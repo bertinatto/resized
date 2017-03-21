@@ -1,0 +1,28 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: celery
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: celery
+    spec:
+      containers:
+      - name: resized-container
+        image: resized:v1
+        command: ["celery"]
+        args: ["worker", "-A", "resized.tasks.celery_app"]
+        volumeMounts:
+        - mountPath: "/original"
+          name: original
+        - mountPath: "/scaled"
+          name: scaled
+      volumes:
+        - name: original
+          persistentVolumeClaim:
+            claimName: myclaim-1
+        - name: scaled
+          persistentVolumeClaim:
+            claimName: myclaim-2
